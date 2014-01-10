@@ -23,7 +23,6 @@ MAX_REC = 42
 
 common_id = 0 
 fun_map = {}
-really = True
 
 class Fun:
 	def __init__(self, fun, chain = [], co_id = None):
