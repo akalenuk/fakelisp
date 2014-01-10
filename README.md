@@ -16,6 +16,10 @@ This is a fake lisp implementation in the python itself. It is not only written 
 
     print X
 
+It prints
+
+    [24, 42]
+    
 Yes, you do have to enclose every list element in a bracet. More bracets, isn't it wonderful!
 
 And you can use only X, Y and Z as a variable and F and G as a function without further declarations. But who needs all that other names anyway.
