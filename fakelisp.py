@@ -25,138 +25,145 @@ common_id = 0
 fun_map = {}
 
 class Fun:
-	def __init__(self, fun, chain = [], co_id = None):
-		if co_id != None:
-			self.co_id = co_id
-		else:
-			global common_id
-			common_id += 1
-			self.co_id = common_id
-			fun_map[self.co_id] = fun		
-		self.chain = chain
-	def __call__(self, a):
-		return Fun(None, self.chain + [a], self.co_id)
-	def __repr__(self):
-		return str(s(self))
-		
+    def __init__(self, fun = None, chain = [], co_id = None):
+        if co_id != None:
+            self.co_id = co_id
+        else:
+            global common_id
+            common_id += 1
+            self.co_id = common_id
+            fun_map[self.co_id] = fun        
+        self.chain = chain
+    def __call__(self, a):
+        return Fun(None, self.chain + [a], self.co_id)
+    def __repr__(self):
+        return str(s(self))
+        
 class Var:
-	def __init__(self, val = None):
-		self.chain = [self]
-		self.val = val
-	def __call__(self, a):
-		if hasattr(self.val, '__call__'):
-			return self.val(a)
-		self.chain += [a]
-		return self
-	def __repr__(self):
-		return str(self.val)		
-	
+    def __init__(self, val = None):
+        self.chain = [self]
+        self.val = val
+    def __call__(self, a):
+        self.chain += [a]
+        return self
+    def __repr__(self):
+        return str(self.val)        
+    
 rc = 0
 class LAMBDA:
-	def __init__(self, args):
-		self.args = [a for a in args.chain]
-		for arg in args.chain:
-			arg.chain = [arg]
-	def __call__(self, body):
-		def l(args, body, x):
-			old_x = [arg.val for arg in args]
-			for arg, xi in zip(args, x):
-				arg.val = s(xi)
-			
-			global rc
-			rc += 1
-			if rc < MAX_REC:
-				r = s(body)
-			else:
-				r = 0
-			rc -= 1
+    def __init__(self, args):
+        self.args = [a for a in args.chain]
+        for arg in args.chain:
+            arg.chain = [arg]
+    def __call__(self, body):
+        def l(args, body, x):
+            def assign_val((a, x)):
+                a.val = x
 
-			for arg, old_xi in zip(args, old_x):
-				arg.val = old_xi
-			return r
-		return Fun(lambda *x: l(self.args, body, x))
+            old_x = [arg.val for arg in args]
+            map(assign_val, zip(args, x))
+            
+            global rc
+            rc += 1
+            if rc < MAX_REC:
+                r = s(body)
+            else:
+                r = 0
+            rc -= 1
 
-	
+            map(assign_val, zip(args, old_x))
+            return r
+        return Fun(lambda *x: l(self.args, body, x))
+
 class SET:
-	def __init__(self, var):
-		self.var = var
-	def __call__(self, value):
-		if isinstance(self.var, Var):
-			self.var.val = value 
-		elif isinstance(self.var, Fun):
-			fun_map[self.var.co_id] = fun_map[value.co_id]
-		return None
+    def __init__(self, var):
+        self.var = var
+    def __call__(self, value):
+        if isinstance(self.var, Var):
+            self.var.val = value 
+        elif isinstance(self.var, Fun):
+            fun_map[self.var.co_id] = fun_map[value.co_id]
+        return None
 
 def s(x):
-	if isinstance(x, list):
-		return [s(xi) for xi in x]
-	if isinstance(x, Fun):
-		return fun_map[x.co_id]( *s(x.chain) )
-	if isinstance(x, Var):
-		return x.val
-	else:
-		return x
-
-		
-ADD = Fun(lambda *x: sum(s(x)))
-EQ = Fun(lambda a, b: a == b)
-SUB = Fun(lambda *x: (s(x[0]) - s(x[1])))
-MUL = Fun(lambda *x: reduce(lambda a,b: s(a)*s(b), x))
+    if isinstance(x, list):
+        return [s(xi) for xi in x]
+    if isinstance(x, Fun):
+        return fun_map[x.co_id]( *s(x.chain) )
+    if isinstance(x, Var):
+        return x.val
+    else:
+        return x
 
 QUOTE = Fun(lambda *x: list(s(x)))
 BEGIN = Fun(lambda *x: (x[-1]))
 IF = Fun(lambda c, r1, r2: r1 if c else r2)
 
-X = Var()
-Y = Var()
-Z = Var()
+EQ = Fun(lambda a, b: a == b)
+NEQ = Fun(lambda a, b: a != b)
+LS = Fun(lambda a, b: a < b)
+GR = Fun(lambda a, b: a > b)
+LSE = Fun(lambda a, b: a <= b)
+GRE = Fun(lambda a, b: a >= b)
+NOT = Fun(lambda a: not a)
+OR = Fun(lambda a, b: a or b)
+AND = Fun(lambda a, b: a and b)
+ADD = Fun(lambda *x: sum(s(x)))
+SUB = Fun(lambda *x: (s(x[0]) - s(x[1])))
+MUL = Fun(lambda *x: reduce(lambda a,b: s(a)*s(b), x))
+DIV = Fun(lambda *x: (s(x[0]) / s(x[1])))
 
-G = Fun(None)
-F = Fun(None)
+
+A = Fun(); B = Fun(); C = Fun(); D = Fun(); E = Fun(); F = Fun(); G = Fun(); H = Fun(); 
+
+I = Var(); J = Var(); K = Var(); L = Var(); M = Var(); N = Var(); O = Var(); P = Var(); 
+Q = Var(); R = Var(); S = Var(); T = Var(); U = Var(); V = Var(); W = Var(); 
+X = Var(); Y = Var(); Z = Var()
+
 
 if __name__ == '__main__':
-	PLUS = Var()
-	TWICE = Var()
-		
-	print "subsub 3 =", (SUB (4) (SUB (3) (2)))
-		
-	(SET (Z) (3))
-	print "set Z 3 =", (Z)
-		
-	print "begin 5 =", (BEGIN 
-		(SET (X) (2)) 
-		(SET (Y) (3)) 
-		(ADD (X) (Y)))
-		
-	print "if 0 =", (IF (EQ (X) (3)) (1) (0))
-		
-	print "quote [1,7] =", (QUOTE (1) (ADD (4) (SUB (6) (3))) )
-	
-	(SET (TWICE) (LAMBDA (Z) (MUL (Z) (2))))
-	print "lambda1 2 =", (TWICE (1))
-	print "lambda1 4 =", (TWICE (2))
-	print "lambda1 12 =", (TWICE (TWICE (3)))
-	print "Z after 3 =", (Z)
-	
+    PLUS = Fun()
+    TWICE = Fun()
+        
+    print "subsub 3 =", (SUB (4) (SUB (3) (2)))
+        
+    (SET (Z) (3))
+    print "set Z 3 =", (Z)
+        
+    print "begin 5 =", (BEGIN 
+        (SET (X) (2)) 
+        (SET (Y) (3)) 
+        (ADD (X) (Y)))
+        
+    print "if 0 =", (IF (EQ (X) (3)) (1) (0))
+        
+    print "quote [1,7] =", (QUOTE (1) (ADD (4) (SUB (6) (3))) )
+    
+    (SET (TWICE) (LAMBDA (Z) (MUL (Z) (2))))
+    print "lambda1 2 =", (TWICE (1))
+    print "lambda1 4 =", (TWICE (2))
+    print "lambda1 12 =", (TWICE (TWICE (3)))
+    print "Z after 3 =", (Z)
+    
 
-	(SET (PLUS) (LAMBDA ((X) (Y)) (ADD (X) (Y))))
+    (SET (PLUS) (LAMBDA ((X) (Y)) (ADD (X) (Y))))
 
-	print "lambda2 5 =", (PLUS (2) (3))
+    print "lambda2 5 =", (PLUS (2) (3))
 
-	print "2x twice 4 =", (TWICE (TWICE (1)))
-	
-	(SET (TWICE) (LAMBDA (X) (MUL (X) (2))))
-	print "x reuse 2 =", (TWICE (1))
-	
-	T = Var()
-	(SET (T) (LAMBDA (X) (TWICE (X))))
-	print "\\ x reuse 8 =", (T (4))
+    print "2x twice 4 =", (TWICE (TWICE (1)))
+    
+    (SET (TWICE) (LAMBDA (X) (MUL (X) (2))))
+    print "x reuse 2 =", (TWICE (1))
+    
+    T = Fun()
+    (SET (T) (LAMBDA (X) (TWICE (X))))
+    print "\\ x reuse 8 =", (T (4))
 
-	
-	F = Fun(None)
-	(SET (F) (LAMBDA (X) 
-		(IF (EQ (X) (1))
-			(1)
-			(MUL (X) (F (SUB (X) (1)))))))
+    
+    F = Fun(None)
+    (SET (F) (LAMBDA (X) 
+        (IF (EQ (X) (1))
+            (1)
+            (MUL (X) (F (SUB (X) (1)))))))
 
-	print "fact 24 =", (F (4))
+    print "fact 24 =", (F (4))
