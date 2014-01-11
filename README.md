@@ -2,19 +2,20 @@ fakelisp
 ========
 
 This is a fake Lisp implementation in the Python itself. It is not only written in Python, but it works in the Python as well. I mean, you don't have to run anything, just do this:
+```python
+from fakelisp import *
 
-    from fakelisp import *
+# and now you can write lisp!
+(BEGIN
+  (SET (F) (LAMBDA (X)
+    (IF (EQ (X) (1))
+      (1)
+      (MUL (X) (F (SUB (X) (1)))))))
 
-    # and now you can write lisp!
-    (BEGIN
-      (SET (F) (LAMBDA (X)
-        (IF (EQ (X) (1))
-          (1)
-          (MUL (X) (F (SUB (X) (1)))))))
+  (SET (X) (QUOTE (F (4)) (42))))
 
-      (SET (X) (QUOTE (F (4)) (42))))
-
-    print X
+print X
+```
 
 It prints
 
