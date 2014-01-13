@@ -19,23 +19,23 @@
 
 # W A R N I N G ! This is not an actual Lisp.
 
-MAX_REC = 42
+MAX_RECURSION_DEPTH = 42
 
 common_id = 0 
 fun_map = {}
 
 class Fun:
-    def __init__(self, fun = None, chain = [], co_id = None):
-        if co_id != None:
-            self.co_id = co_id
+    def __init__(self, fun = None, chain = [], uid = None):
+        if uid != None:
+            self.uid = uid
         else:
             global common_id
             common_id += 1
-            self.co_id = common_id
-            fun_map[self.co_id] = fun        
+            self.uid = common_id
+            fun_map[self.uid] = fun        
         self.chain = chain
-    def __call__(self, a):
-        return Fun(None, self.chain + [a], self.co_id)
+    def __call__(self, next_arg):
+        return Fun(None, self.chain + [next_arg], self.uid)
     def __repr__(self):
         return str(s(self))
         
@@ -43,8 +43,8 @@ class Var:
     def __init__(self, val = None):
         self.chain = [self]
         self.val = val
-    def __call__(self, a):
-        self.chain += [a]
+    def __call__(self, next_var):
+        self.chain += [next_var]
         return self
     def __repr__(self):
         return str(self.val)        
@@ -53,8 +53,6 @@ rc = 0
 class LAMBDA:
     def __init__(self, args):
         self.args = [a for a in args.chain]
-        for arg in args.chain:
-            arg.chain = [arg]
     def __call__(self, body):
         def l(args, body, x):
             def assign_val((a, x)):
@@ -65,7 +63,7 @@ class LAMBDA:
             
             global rc
             rc += 1
-            if rc < MAX_REC:
+            if rc < MAX_RECURSION_DEPTH:
                 r = s(body)
             else:
                 r = 0
@@ -80,23 +78,23 @@ class SET:
         self.var = var
     def __call__(self, value):
         if isinstance(self.var, Var):
-            self.var.val = value 
+            self.var.val = value
         elif isinstance(self.var, Fun):
-            fun_map[self.var.co_id] = fun_map[value.co_id]
+            fun_map[self.var.uid] = fun_map[value.uid]
         return None
 
 def s(x):
     if isinstance(x, list):
         return [s(xi) for xi in x]
     if isinstance(x, Fun):
-        return fun_map[x.co_id]( *s(x.chain) )
+        return fun_map[x.uid]( *s(x.chain) )
     if isinstance(x, Var):
         return x.val
     else:
         return x
 
 QUOTE = Fun(lambda *x: list(s(x)))
-BEGIN = Fun(lambda *x: (x[-1]))
+BEGIN = Fun(lambda *x: x[-1])
 IF = Fun(lambda c, r1, r2: r1 if c else r2)
 
 EQ = Fun(lambda a, b: a == b)
