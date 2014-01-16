@@ -19,81 +19,46 @@
 
 # W A R N I N G ! This is not an actual Lisp.
 
-MAX_RECURSION_DEPTH = 42
-
-common_id = 0 
-fun_map = {}
-
 class Fun:
-    def __init__(self, fun = None, chain = [], uid = None):
-        if uid != None:
-            self.uid = uid
+    def __init__(self, fun_stack = None, chain = []):
+        if isinstance(fun_stack, list):
+            self.fun_stack = fun_stack
         else:
-            global common_id
-            common_id += 1
-            self.uid = common_id
-            fun_map[self.uid] = fun        
+            self.fun_stack = [fun_stack]
         self.chain = chain
     def __call__(self, next_arg):
-        return Fun(None, self.chain + [next_arg], self.uid)
+        return Fun(self.fun_stack, self.chain + [next_arg])
     def __repr__(self):
         return str(s(self))
-        
-class Var:
-    def __init__(self, val = None):
-        self.chain = [self]
-        self.val = val
-    def __call__(self, next_var):
-        self.chain += [next_var]
-        return self
-    def __repr__(self):
-        return str(self.val)        
-    
-rc = 0
-class LAMBDA:
-    def __init__(self, args):
-        self.args = [a for a in args.chain]
-    def __call__(self, body):
-        def l(args, body, x):
-            def assign_val((a, x)):
-                a.val = x
+    def push_fun(self, fun):
+        self.fun_stack += [fun]
+    def pop_fun(self):
+        self.fun_stack = self.fun_stack[:-1]
 
-            old_x = [arg.val for arg in args]
-            map(assign_val, zip(args, x))
-            
-            global rc
-            rc += 1
-            if rc < MAX_RECURSION_DEPTH:
-                r = s(body)
-            else:
-                r = 0
-            rc -= 1
-            
-            map(assign_val, zip(args, old_x))
-            return r
-        return Fun(lambda *x: l(self.args, body, s(list(x))))
 
-class SET:
-    def __init__(self, var):
-        self.var = var
-    def __call__(self, value):
-        if isinstance(self.var, Var):
-            self.var.val = s(value)
-        elif isinstance(self.var, Fun):
-            fun_map[self.var.uid] = fun_map[value.uid]
-        return None
+def l(args, body, x):
+    map (lambda (arg, val): arg.push_fun( lambda *a : val ), zip(args, x))
+    r = s(body)
+    map (lambda arg: arg.pop_fun(), args)
+    return r
+
+def a(var, value):
+    if isinstance(value, Fun):
+        var.fun_stack[-1] = value.fun_stack[-1]
+    else:
+        var.fun_stack[-1] = lambda *x: value
 
 def s(x):
     if isinstance(x, list):
         return [s(xi) for xi in x]
     if isinstance(x, Fun):
-        return s(fun_map[x.uid]( *(x.chain) ))
-    if isinstance(x, Var):
-        return x.val
+        return s(x.fun_stack[-1]( *(x.chain) ))
     else:
         return x
-        
 
+
+LAMBDA = lambda args: lambda body: Fun(lambda *x: l([args] + args.chain, body, s(list(x))))
+SET = Fun(lambda var, value: a(var, value))
 QUOTE = Fun(lambda *x: s(list(x)))
 BEGIN = Fun(lambda *x: s(list(x))[-1])
 IF = Fun(lambda c, r1, r2: r1 if s(c) else r2)
@@ -114,55 +79,61 @@ DIV = Fun(lambda a, b: (s(a) / s(b)))
 
 
 A = Fun(); B = Fun(); C = Fun(); D = Fun(); E = Fun(); F = Fun(); G = Fun(); H = Fun(); 
-
-I = Var(); J = Var(); K = Var(); L = Var(); M = Var(); N = Var(); O = Var(); P = Var(); 
-Q = Var(); R = Var(); S = Var(); T = Var(); U = Var(); V = Var(); W = Var(); 
-X = Var(); Y = Var(); Z = Var()
+I = Fun(); J = Fun(); K = Fun(); L = Fun(); M = Fun(); N = Fun(); O = Fun(); P = Fun(); 
+Q = Fun(); R = Fun(); S = Fun(); T = Fun(); U = Fun(); V = Fun(); W = Fun(); 
+X = Fun(); Y = Fun(); Z = Fun()
 
 
 if __name__ == '__main__':
-    PLUS = Fun()
-    TWICE = Fun()
-        
-    print "subsub 3 =", (SUB (4) (SUB (3) (2)))
-        
-    (SET (Z) (3))
-    print "set Z 3 =", (Z)
-        
-    print "begin 5 =", (BEGIN 
-        (SET (X) (2)) 
+    def check(a, x, s):
+        if str(x) == str(s):
+            print a+"      \tok"
+        else:
+            print a+" - found " + str(x) + " instead of " + str(s)
+
+
+    check("subsub", (SUB (4) (SUB (3) (2))), 3)
+    
+    check("begin", BEGIN
+        (SET (Z) (3))
+        (SET (X) (2))
         (SET (Y) (3)) 
-        (ADD (X) (Y)))
-        
-    print "if 0 =", (IF (EQ (X) (3)) (1) (0))
-        
-    print "quote [1, 7] =", (QUOTE (1) (ADD (4) (SUB (6) (3))) )
-    
-    (SET (TWICE) (LAMBDA (Z) (MUL (Z) (2))))
-    print "lambda1 2 =", (TWICE (1))
-    print "lambda1 4 =", (TWICE (2))
-    print "lambda1 12 =", (TWICE (TWICE (3)))
-    print "Z after 3 =", (Z)
-    
+        (ADD (X) (Y)), 5)
 
-    (SET (PLUS) (LAMBDA ((X) (Y)) (ADD (X) (Y))))
+    check("set Z", (Z), 3)
 
-    print "lambda2 5 =", (PLUS (2) (3))
+    check("if X==3", (IF (EQ (X) (3)) (1) (0)), 0)
+    
+    check("quote", (QUOTE (1) (ADD (4) (SUB (6) (3)))), [1, 7] )
 
-    print "2x twice 4 =", (TWICE (TWICE (1)))
+    TWICE = Fun()
+    s(SET (TWICE) (LAMBDA (Z) (MUL (Z) (2))))
     
-    (SET (TWICE) (LAMBDA (X) (MUL (X) (2))))
-    print "x reuse 2 =", (TWICE (1))
-    
+    check("lambda1", (TWICE (1)), 2)
+    check("lambda1", (TWICE (2)), 4)
+    check("lambda1", (TWICE (TWICE (3))), 12)
+    check("Z after", (Z), 3)
+
+    PLUS = Fun()
+    s(SET (PLUS) (LAMBDA ((X) (Y)) (ADD (X) (Y))))
+
+    check("lambda2", (PLUS (2) (3)), 5)
+
+    check("2x twice", (TWICE (TWICE (1))), 4)
+
+    s(SET (TWICE) (LAMBDA (X) (MUL (X) (2))))
+    check("x reuse", (TWICE (1)), 2)
+   
     T = Fun()
-    (SET (T) (LAMBDA (X) (TWICE (X))))
-    print "\\ x reuse 8 =", (T (4))
-    
+    s(SET (T) (LAMBDA (X) (TWICE (X))))
+    check("\\ x reuse", (T (4)), 8)
+
 
     F = Fun(None)
-    (SET (F) (LAMBDA (X) 
+    s(SET (F) (LAMBDA (X)
         (IF (EQ (X) (1))
             (1)
             (MUL (X) (F (SUB (X) (1)))))))
 
-    print "fact 24 =", (F (4))
+    check("fact", (F (4)), 24)
+   
