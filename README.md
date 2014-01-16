@@ -7,12 +7,12 @@ from fakelisp import *
 
 # and now you can write lisp
 X = (BEGIN
-	(SET (F) (LAMBDA (X)
-		(IF (EQ (X) (1))
-			(1)
-			(MUL (X) (F (SUB (X) (1)))))))
+		(SET (F) (LAMBDA (X)
+			(IF (EQ (X) (1))
+				(1)
+				(MUL (X) (F (SUB (X) (1)))))))
 
-	(QUOTE (F (4)) (42)))
+		(QUOTE (F (4)) (42)))
 
 # back to Python
 print "x: ", X
