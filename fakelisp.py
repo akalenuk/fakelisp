@@ -68,17 +68,17 @@ class LAMBDA:
             else:
                 r = 0
             rc -= 1
-
+            
             map(assign_val, zip(args, old_x))
             return r
-        return Fun(lambda *x: l(self.args, body, x))
+        return Fun(lambda *x: l(self.args, body, s(list(x))))
 
 class SET:
     def __init__(self, var):
         self.var = var
     def __call__(self, value):
         if isinstance(self.var, Var):
-            self.var.val = value
+            self.var.val = s(value)
         elif isinstance(self.var, Fun):
             fun_map[self.var.uid] = fun_map[value.uid]
         return None
@@ -87,29 +87,30 @@ def s(x):
     if isinstance(x, list):
         return [s(xi) for xi in x]
     if isinstance(x, Fun):
-        return fun_map[x.uid]( *s(x.chain) )
+        return s(fun_map[x.uid]( *(x.chain) ))
     if isinstance(x, Var):
         return x.val
     else:
         return x
+        
 
-QUOTE = Fun(lambda *x: list(s(x)))
-BEGIN = Fun(lambda *x: x[-1])
-IF = Fun(lambda c, r1, r2: r1 if c else r2)
+QUOTE = Fun(lambda *x: s(list(x)))
+BEGIN = Fun(lambda *x: s(list(x))[-1])
+IF = Fun(lambda c, r1, r2: r1 if s(c) else r2)
 
-EQ = Fun(lambda a, b: a == b)
-NEQ = Fun(lambda a, b: a != b)
-LS = Fun(lambda a, b: a < b)
-GR = Fun(lambda a, b: a > b)
-LSE = Fun(lambda a, b: a <= b)
-GRE = Fun(lambda a, b: a >= b)
-NOT = Fun(lambda a: not a)
-OR = Fun(lambda a, b: a or b)
-AND = Fun(lambda a, b: a and b)
-ADD = Fun(lambda *x: sum(s(x)))
-SUB = Fun(lambda *x: (s(x[0]) - s(x[1])))
+EQ = Fun(lambda a, b: s(a) == s(b))
+NEQ = Fun(lambda a, b: s(a) != s(b))
+LS = Fun(lambda a, b: s(a) < s(b))
+GR = Fun(lambda a, b: s(a) > s(b))
+LSE = Fun(lambda a, b: s(a) <= s(b))
+GRE = Fun(lambda a, b: s(a) >= s(b))
+NOT = Fun(lambda a: not s(a))
+OR = Fun(lambda a, b: s(a) or s(b))
+AND = Fun(lambda a, b: s(a) and s(b))
+ADD = Fun(lambda *x: sum(s(list(x))))
+SUB = Fun(lambda a, b: (s(a) - s(b)))
 MUL = Fun(lambda *x: reduce(lambda a,b: s(a)*s(b), x))
-DIV = Fun(lambda *x: (s(x[0]) / s(x[1])))
+DIV = Fun(lambda a, b: (s(a) / s(b)))
 
 
 A = Fun(); B = Fun(); C = Fun(); D = Fun(); E = Fun(); F = Fun(); G = Fun(); H = Fun(); 
@@ -135,7 +136,7 @@ if __name__ == '__main__':
         
     print "if 0 =", (IF (EQ (X) (3)) (1) (0))
         
-    print "quote [1,7] =", (QUOTE (1) (ADD (4) (SUB (6) (3))) )
+    print "quote [1, 7] =", (QUOTE (1) (ADD (4) (SUB (6) (3))) )
     
     (SET (TWICE) (LAMBDA (Z) (MUL (Z) (2))))
     print "lambda1 2 =", (TWICE (1))
@@ -156,8 +157,8 @@ if __name__ == '__main__':
     T = Fun()
     (SET (T) (LAMBDA (X) (TWICE (X))))
     print "\\ x reuse 8 =", (T (4))
-
     
+
     F = Fun(None)
     (SET (F) (LAMBDA (X) 
         (IF (EQ (X) (1))
