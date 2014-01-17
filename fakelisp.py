@@ -59,9 +59,13 @@ def s(x):
 
 LAMBDA = lambda args: lambda body: Fun(lambda *x: l([args] + args.chain, body, s(list(x))))
 SET = Fun(lambda var, value: a(var, value))
+IF = Fun(lambda c, r1, r2: r1 if s(c) else r2)
+
 QUOTE = Fun(lambda *x: s(list(x)))
 BEGIN = Fun(lambda *x: s(list(x))[-1])
-IF = Fun(lambda c, r1, r2: r1 if s(c) else r2)
+HEAD = Fun(lambda x: s(x)[0])
+TAIL = Fun(lambda x: s(x)[1:])
+CAT = Fun(lambda *x: reduce(lambda a, b: s(a) + s(b), x))
 
 EQ = Fun(lambda a, b: s(a) == s(b))
 NEQ = Fun(lambda a, b: s(a) != s(b))
@@ -137,3 +141,16 @@ if __name__ == '__main__':
 
     check("fact", (F (4)), 24)
    
+    check("lists", (CAT 
+			(QUOTE (HEAD (QUOTE (1) (2) (3) (4)))) 
+			(TAIL (QUOTE (1) (2) (3) (4))) 
+			(QUOTE (5))), [1,2,3,4,5])
+
+    A2X = Fun()
+    s(SET (A2X) (LAMBDA (X)
+	(IF (EQ (X) (QUOTE))
+		(QUOTE)
+		(CAT 
+			(QUOTE (MUL (2) (HEAD (X))))
+			(A2X (TAIL (X)))))))
+    check("array", (A2X (QUOTE (1) (2) (3))), [2,4,6])
