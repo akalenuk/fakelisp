@@ -36,8 +36,8 @@ class Fun:
         self.fun_stack = self.fun_stack[:-1]
 
 
-def l(args, body, x):
-    map (lambda (arg, val): arg.push_fun( lambda *a : val ), zip(args, x))
+def l(args, body, x):	
+    map (lambda (arg, val): arg.push_fun( lambda *a : val ), zip(args, s(x)))
     r = s(body)
     map (lambda arg: arg.pop_fun(), args)
     return r
@@ -57,7 +57,7 @@ def s(x):
         return x
 
 
-LAMBDA = lambda args: lambda body: Fun(lambda *x: l([args] + args.chain, body, s(list(x))))
+LAMBDA = lambda args: lambda body: Fun(lambda *x: l([args] + args.chain, body, list(x)))
 SET = Fun(lambda var, value: a(var, value))
 IF = Fun(lambda c, r1, r2: r1 if s(c) else r2)
 
@@ -89,6 +89,9 @@ X = Fun(); Y = Fun(); Z = Fun()
 
 
 if __name__ == '__main__':
+    import sys
+    sys.setrecursionlimit(100)
+
     def check(a, x, s):
         if str(x) == str(s):
             print a+"      \tok"
