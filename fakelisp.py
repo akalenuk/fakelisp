@@ -45,6 +45,7 @@ def l(args, body, x):
 def a(var, value):
     if isinstance(value, Fun):
         var.fun_stack[-1] = value.fun_stack[-1]
+	var.chain = [link for link in value.chain]        
     else:
         var.fun_stack[-1] = lambda *x: value
 
@@ -157,3 +158,7 @@ if __name__ == '__main__':
 			(QUOTE (MUL (2) (HEAD (X))))
 			(A2X (TAIL (X)))))))
     check("array", (A2X (QUOTE (1) (2) (3))), [2,4,6])
+
+    TWICE = Fun()
+    s(SET (TWICE) (MUL (2)))    
+    check("pointless", (TWICE (6)), 12)
