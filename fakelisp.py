@@ -53,6 +53,8 @@ def a(var, value):
         var.arity = value.arity
     else:
         var.fun_stack[-1] = lambda *x: value
+        var.chain = []
+        var.arity = 0
 
 def s(x):
     if isinstance(x, list):
@@ -171,5 +173,5 @@ if __name__ == '__main__':
     check("pointless", (TWICE (6)), 12)
     
     s(SET (F) (LAMBDA (X) (ADD (X) (21))))
-    s(SET (G) (LAMBDA (Y) (Y (12))))
+    s(SET (G) (LAMBDA (X) (X (12))))
     check("1-class \\", (G (F)), 33)
