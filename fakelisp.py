@@ -20,32 +20,37 @@
 # W A R N I N G ! This is not an actual Lisp.
 
 class Fun:
-    def __init__(self, fun_stack = None, chain = []):
+    def __init__(self, fun_stack = None, arity = 0, chain = []):
         if isinstance(fun_stack, list):
             self.fun_stack = fun_stack
         else:
             self.fun_stack = [fun_stack]
         self.chain = chain
+        self.arity = arity
     def __call__(self, next_arg):
-        return Fun(self.fun_stack, self.chain + [next_arg])
+        return Fun(self.fun_stack, self.arity, self.chain + [next_arg] )
     def __repr__(self):
+        if self.arity > len(self.chain):
+            return "Fun"
         return str(s(self))
-    def push_fun(self, fun):
-        self.fun_stack += [fun]
+    def push_fun(self, val):
+        self.fun_stack += [None]
+        a(self, val)
     def pop_fun(self):
         self.fun_stack = self.fun_stack[:-1]
 
-
-def l(args, body, x):	
-    map (lambda (arg, val): arg.push_fun( lambda *a : val ), zip(args, s(x)))
+        
+def l(args, body, x):
+    map (lambda (arg, val): arg.push_fun( val ), zip(args, s(x)))
     r = s(body)
     map (lambda arg: arg.pop_fun(), args)
     return r
-
+    
 def a(var, value):
     if isinstance(value, Fun):
         var.fun_stack[-1] = value.fun_stack[-1]
-	var.chain = [link for link in value.chain]        
+        var.chain = [link for link in value.chain]
+        var.arity = value.arity
     else:
         var.fun_stack[-1] = lambda *x: value
 
@@ -53,12 +58,14 @@ def s(x):
     if isinstance(x, list):
         return [s(xi) for xi in x]
     if isinstance(x, Fun):
-        return s(x.fun_stack[-1]( *(x.chain) ))
-    else:
-        return x
+	if x.arity <= len(x.chain):
+            return s(x.fun_stack[-1]( *(x.chain) ))
+        else:
+            return Fun(lambda y: x(y), x.arity - len(x.chain), x.chain)
+    return x
 
 
-LAMBDA = lambda args: lambda body: Fun(lambda *x: l([args] + args.chain, body, list(x)))
+LAMBDA = lambda args: lambda body: Fun(lambda *x: l([args] + args.chain, body, list(x)), len(args.chain)+1)
 SET = Fun(lambda var, value: a(var, value))
 IF = Fun(lambda c, r1, r2: r1 if s(c) else r2)
 
@@ -162,3 +169,7 @@ if __name__ == '__main__':
     TWICE = Fun()
     s(SET (TWICE) (MUL (2)))    
     check("pointless", (TWICE (6)), 12)
+    
+    s(SET (F) (LAMBDA (X) (ADD (X) (21))))
+    s(SET (G) (LAMBDA (Y) (Y (12))))
+    check("1-class \\", (G (F)), 33)
