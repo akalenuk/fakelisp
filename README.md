@@ -26,7 +26,7 @@ Yes, you do have to enclose every list element in a bracet. More bracets, isn't 
 
 And you can only use one letter identifiers without further declarations. But who needs all that monstrous naming anyway.
 
-Otherwise, it is a perfect lisp inside Python. It looks like lisp, it works like lisp, so by duck typing principle it is lisp. It has no dependencies, doesn't use "eval" and the core code is only 84 lines including license!
+Otherwise, it is a perfect lisp inside Python. It looks like lisp, it works like lisp, so by duck typing principle it is lisp. It has no dependencies, doesn't use "eval" and the core code is only a hundred lines including license!
 
 But seriously, it is fake after all. If you are looking for a lisp implementation in Python, see http://norvig.com/lispy.html
 
