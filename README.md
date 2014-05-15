@@ -22,7 +22,7 @@ It prints
 
     [24, 42]
     
-Yes, you do have to enclose every list element in a bracet. More bracets, isn't it wonderful!
+Yes, you do have to enclose every list element in a bracket. More brackets, isn't it wonderful!
 
 And you can only use one letter identifiers without further declarations. But who needs all that monstrous naming anyway.
 
