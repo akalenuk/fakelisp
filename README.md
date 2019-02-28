@@ -32,7 +32,7 @@ But seriously, it is fake after all. If you are looking for a lisp implementatio
 
 And if you want a python with lispish syntax, try http://julien.danjou.info/blog/2013/lisp-python-hy
 
-My fakelisp is literally _fake Lisp_. It is just a bunch of hacks making valid python code look a little like lisp. Check the code, it's really tiny!
+My fakelisp is literally _fake Lisp_. It is just a bunch of hacks making valid python code look lisp-ish. Check the code, it's really tiny!
 
 
 P. S. For another example of Python syntax misuse check ArrPL: https://github.com/akalenuk/arrpl It's an array processing library inspired by APL.
