@@ -41,7 +41,7 @@ def s(x):   #   evaluating s-expression
     if isinstance(x, list):
         return [s(xi) for xi in x]
     if isinstance(x, Fun):
-	if x.arity <= len(x.chain):
+        if x.arity <= len(x.chain):
             return s(x.fun_stack[-1]( *(x.chain) )) # normal case
         else:
             return Fun(lambda y: x(y), x.arity - len(x.chain), x.chain) # when evaluation returns a Fun, like in LAMBDA assignment
@@ -51,7 +51,7 @@ def s(x):   #   evaluating s-expression
 LAMBDA = lambda args: lambda body: Fun(lambda *x: l([args] + args.chain, body, list(x)), len(args.chain)+1)
 SET = Fun(lambda var, value: a(var, value))
 IF = Fun(lambda c, r1, r2: r1 if s(c) else r2)
-    
+
 LIST = Fun(lambda *x: s(list(x)))
 BEGIN = Fun(lambda *x: s(list(x))[-1])
 HEAD = Fun(lambda x: s(x)[0])
