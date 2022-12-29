@@ -1,7 +1,7 @@
 fakelisp
 ========
 
-This is a fake Lisp implementation in Python. No-no-no, not written in Python, it *is in Python*. You just have to import it:
+This is a fake Lisp implementation in Python. No-no-no, not *written in Python*, it **is in Python**. You just have to import it:
 ```python
 from fakelisp import *
 
