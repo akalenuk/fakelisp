@@ -37,4 +37,4 @@ My fakelisp is literally _fake Lisp_. It is just a bunch of hacks making valid p
 
 P. S. For another example of Python syntax misuse check ArrPL: https://github.com/akalenuk/arrpl It's an array processing library inspired by APL.
 
-P. S. S. Yes. it's in Python 2. I wrote it about a decade ago and never bothered to redo it in Python 3. They took my `reduce` away from the core, packed it into a library, and this broke the compatibility. And the pureness of the implementation :-(
+P. S. S. Yes. it's in Python 2. I wrote it about a decade ago and never bothered to redo it in Python 3. I can live with bracketed `print`s but they took `reduce` away from the core, packed it into a library, and this broke the compatibility. And the pureness of the implementation :-(
