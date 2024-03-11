@@ -30,7 +30,7 @@ Otherwise, it is a perfect Lisp inside Python. It looks like Lisp, it works like
 
 But seriously, it is fake after all. If you are looking for a nice and small Lisp implementation in Python, see http://norvig.com/lispy.html
 
-And if you want a Python with Lisp-ish syntax, try http://julien.danjou.info/blog/2013/lisp-python-hy
+And if you want a Python with Lisp-ish syntax, try [Hylang](https://github.com/hylang/hy).
 
 My fakelisp is literally _fake Lisp_. It is just a bunch of hacks making valid python code look lisp-ish. Check the code, it's really tiny!
 
